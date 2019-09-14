@@ -1,14 +1,13 @@
 const express = require('express');
-const {check, validationResult} = require('express-validator');
+const {check} = require('express-validator');
 
 const auth = require('../../middleware/auth');
 
-const User = require('../../models/User');
-const Profile = require('../../models/Profile');
-
+// Import controllers
 const {
 	currentProfile,
-	createOrUpdateProfile
+	createOrUpdateProfile,
+	getAllProfiles
 } = require('../../controllers/profileController');
 
 const router = express.Router();
@@ -34,5 +33,10 @@ router.post(
 	],
 	createOrUpdateProfile
 );
+
+// @route  GET api/profile
+// @desc   Get all profiles
+// @access Public
+router.get('/', getAllProfiles);
 
 module.exports = router;

@@ -1,7 +1,8 @@
 const {validationResult} = require('express-validator');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('config');
+
+const signJwt = require('../helpers/signJwt');
+const serverError = require('../helpers/serverError');
 
 const User = require('../models/User');
 
@@ -10,8 +11,7 @@ exports.authTest = async (req, res) => {
 		const user = await User.findById(req.user.id).select('-password');
 		res.json(user);
 	} catch (err) {
-		console.error(err);
-		res.status(500).json({msg: 'Internal server error'});
+		return serverError(err, res);
 	}
 };
 
@@ -36,25 +36,13 @@ exports.login = async (req, res) => {
 		}
 
 		// Return JWT
-		const payload = {
-			user: {
-				id: user.id
-			}
-		};
-
-		jwt.sign(
-			payload,
-			config.get('jwtSecret'),
-			{expiresIn: 3600},
-			(err, token) => {
-				if (err) throw err;
-				return res.status(200).json({
-					token
-				});
-			}
-		);
+		signJwt(user, (err, token) => {
+			if (err) throw err;
+			return res.status(200).json({
+				token
+			});
+		});
 	} catch (err) {
-		console.error(err.message);
-		return res.status(500).json({message: 'Something went wrong'});
+		return serverError(err, res);
 	}
 };

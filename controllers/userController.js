@@ -1,10 +1,28 @@
 const {validationResult} = require('express-validator');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const config = require('config');
+
+const signJwt = require('../helpers/signJwt');
+const serverError = require('../helpers/serverError');
 
 const User = require('../models/User');
+
+const hashPassword = async password => {
+	const salt = await bcrypt.genSalt(10);
+	return bcrypt.hash(password, salt);
+};
+
+const getAvatar = email =>
+	gravatar.url(email, {
+		s: '200',
+		r: 'pg',
+		d: 'mm'
+	});
+
+const createUser = async (name, email, avatar, password) => {
+	const user = new User({name, email, avatar, password});
+	return user.save();
+};
 
 exports.registerUser = async (req, res) => {
 	const errors = validationResult(req);
@@ -20,40 +38,22 @@ exports.registerUser = async (req, res) => {
 		}
 
 		// Get user's gravatar
-		const avatar = gravatar.url(email, {
-			s: '200',
-			r: 'pg',
-			d: 'mm'
-		});
+		const avatar = getAvatar(email);
 
 		// Hash password
-		const salt = await bcrypt.genSalt(10);
-		const hashedPassword = await bcrypt.hash(password, salt);
+		const hashedPassword = await hashPassword(password);
 
 		// Save user
-		const user = new User({name, email, avatar, password: hashedPassword});
-		const newUser = await user.save();
+		const newUser = await createUser(name, email, avatar, hashedPassword);
 
 		// Return JWT
-		const payload = {
-			user: {
-				id: newUser.id
-			}
-		};
-
-		jwt.sign(
-			payload,
-			config.get('jwtSecret'),
-			{expiresIn: 3600},
-			(err, token) => {
-				if (err) throw err;
-				return res.status(200).json({
-					token
-				});
-			}
-		);
+		signJwt(newUser, (err, token) => {
+			if (err) throw err;
+			return res.status(200).json({
+				token
+			});
+		});
 	} catch (err) {
-		console.error(err.message);
-		return res.status(500).json({message: 'Something went wrong'});
+		return serverError(err, res);
 	}
 };

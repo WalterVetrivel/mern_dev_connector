@@ -1,22 +1,8 @@
 const {validationResult} = require('express-validator');
 
-const Profile = require('../models/Profile');
+const serverError = require('../helpers/serverError');
 
-exports.currentProfile = async (req, res) => {
-	try {
-		const profile = await Profile.findOne({user: req.user.id}).populate(
-			'user',
-			['name', 'avatar']
-		);
-		if (!profile) {
-			return res.status(400).json({msg: 'There is no profile for this user.'});
-		}
-		return res.status(200).json(profile);
-	} catch (err) {
-		console.error(err.message);
-		res.status(500).json({msg: 'Internal server error'});
-	}
-};
+const Profile = require('../models/Profile');
 
 // To generate a profile object using the fields in the request body
 const generateProfileObject = (body, userId) => {
@@ -81,6 +67,22 @@ const createProfile = async profileFields => {
 	return profile.save();
 };
 
+// Controllers
+exports.currentProfile = async (req, res) => {
+	try {
+		const profile = await Profile.findOne({user: req.user.id}).populate(
+			'user',
+			['name', 'avatar']
+		);
+		if (!profile) {
+			return res.status(400).json({msg: 'There is no profile for this user.'});
+		}
+		return res.status(200).json(profile);
+	} catch (err) {
+		return serverError(err, res);
+	}
+};
+
 exports.createOrUpdateProfile = async (req, res) => {
 	try {
 		const errors = validationResult(req);
@@ -102,7 +104,13 @@ exports.createOrUpdateProfile = async (req, res) => {
 
 		return res.status(200).json(profile);
 	} catch (err) {
-		console.error(err.message);
-		res.status(500).json({msg: 'Internal server error'});
+		return serverError(err, res);
+	}
+};
+
+exports.getAllProfiles = async (req, res) => {
+	try {
+	} catch (err) {
+		return serverError(err, res);
 	}
 };
