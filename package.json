@@ -1,0 +1,37 @@
+{
+	"name": "devconnectornew",
+	"version": "1.0.0",
+	"description": "A social network for developers using the MERN stack",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node server",
+		"server": "nodemon server"
+	},
+	"keywords": [
+		"React",
+		"Node",
+		"Mongo",
+		"Express",
+		"REST",
+		"MERN",
+		"DevConnector",
+		"Social",
+		"Media"
+	],
+	"author": "Walter Selvakumar, Brad Traversy",
+	"license": "ISC",
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"config": "^3.2.2",
+		"express": "^4.17.1",
+		"express-validator": "^6.2.0",
+		"gravatar": "^1.8.0",
+		"jsonwebtoken": "^8.5.1",
+		"mongoose": "^5.7.1",
+		"request": "^2.88.0"
+	},
+	"devDependencies": {
+		"concurrently": "^4.1.2"
+	}
+}
