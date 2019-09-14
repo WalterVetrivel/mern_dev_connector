@@ -1,6 +1,8 @@
 const express = require('express');
 const {check} = require('express-validator');
 
+const validation = require('../../middleware/validation');
+
 const {registerUser} = require('../../controllers/userController');
 
 const router = express.Router();
@@ -21,7 +23,8 @@ router.post(
 		check('password', 'Password is required')
 			.not()
 			.isEmpty(),
-		check('password', 'Password too short').isLength({min: 8})
+		check('password', 'Password too short').isLength({min: 8}),
+		validation
 	],
 	registerUser
 );

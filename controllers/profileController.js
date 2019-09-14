@@ -1,4 +1,4 @@
-const {validationResult} = require('express-validator');
+// const {validationResult} = require('express-validator');
 
 const serverError = require('../helpers/serverError');
 
@@ -68,7 +68,7 @@ const createProfile = async profileFields => {
 	return profile.save();
 };
 
-// Controllers
+// CONTROLLERS
 exports.currentProfile = async (req, res) => {
 	try {
 		const profile = await Profile.findOne({user: req.user.id}).populate(
@@ -87,11 +87,6 @@ exports.currentProfile = async (req, res) => {
 // Create or update profile
 exports.createOrUpdateProfile = async (req, res) => {
 	try {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({errors: errors.array()});
-		}
-
 		const profileFields = generateProfileObject(req.body, req.user.id);
 
 		let profile = await Profile.findOne({user: req.user.id});
@@ -148,6 +143,14 @@ exports.deleteProfileUserAndPosts = async (req, res) => {
 		// Remove the user
 		await User.findOneAndRemove({_id: req.user.id});
 		return res.json({msg: 'User deleted'});
+	} catch (err) {
+		return serverError(err, res);
+	}
+};
+
+// Add experience
+exports.putExperience = async (req, res) => {
+	try {
 	} catch (err) {
 		return serverError(err, res);
 	}

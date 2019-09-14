@@ -2,6 +2,7 @@ const express = require('express');
 const {check} = require('express-validator');
 
 const auth = require('../../middleware/auth');
+const validation = require('../../middleware/validation');
 
 const {authTest, login} = require('../../controllers/authController');
 
@@ -23,7 +24,8 @@ router.post(
 			.isEmpty(),
 		check('password', 'Password is required')
 			.not()
-			.isEmpty()
+			.isEmpty(),
+		validation
 	],
 	login
 );
