@@ -62,13 +62,35 @@ const updateProfile = async (userId, profileFields) => {
 	);
 };
 
-// To create a new profile
+// To create a new profile on the database
 const createProfile = async profileFields => {
 	const profile = new Profile(profileFields);
 	return profile.save();
 };
 
+// To generate a experience object
+const generateExperienceObject = (body, res) => {
+	const {title, company, location, from, to, current, description} = body;
+	const experience = {};
+	// Required fields
+	if (!title || !company || !from) {
+		return res.status(400).json({msg: 'Invalid data'});
+	}
+	experience.title = title;
+	experience.company = company;
+	experience.from = from;
+
+	// Optional fields
+	if (location) experience.location = location;
+	if (current) experience.current = current;
+	else if (to) experience.to = to;
+	if (description) experience.description = description;
+
+	return experience;
+};
+
 // CONTROLLERS
+// Get current user's profile
 exports.currentProfile = async (req, res) => {
 	try {
 		const profile = await Profile.findOne({user: req.user.id}).populate(
@@ -151,6 +173,11 @@ exports.deleteProfileUserAndPosts = async (req, res) => {
 // Add experience
 exports.putExperience = async (req, res) => {
 	try {
+		const experience = generateExperienceObject(req.body, res);
+		let profile = await Profile.findOne({user: req.user.id});
+		profile.experience.unshift(experience);
+		profile = await profile.save();
+		res.status(200).json(profile);
 	} catch (err) {
 		return serverError(err, res);
 	}
