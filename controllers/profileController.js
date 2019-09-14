@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator');
 
 const serverError = require('../helpers/serverError');
 
+const User = require('../models/User');
 const Profile = require('../models/Profile');
 
 // To generate a profile object using the fields in the request body
@@ -83,6 +84,7 @@ exports.currentProfile = async (req, res) => {
 	}
 };
 
+// Create or update profile
 exports.createOrUpdateProfile = async (req, res) => {
 	try {
 		const errors = validationResult(req);
@@ -108,8 +110,44 @@ exports.createOrUpdateProfile = async (req, res) => {
 	}
 };
 
+// Get all profiles
 exports.getAllProfiles = async (req, res) => {
 	try {
+		const profiles = await Profile.find().populate('user', ['name', 'avatar']);
+		res.json(profiles);
+	} catch (err) {
+		return serverError(err, res);
+	}
+};
+
+// Get profile by user ID
+exports.getProfileById = async (req, res) => {
+	try {
+		const profile = await Profile.findOne({user: req.params.id}).populate(
+			'user',
+			['name', 'avatar']
+		);
+		if (!profile) {
+			return res.status(404).json({msg: 'Not found'});
+		}
+		return res.json(profile);
+	} catch (err) {
+		if (err.kind == 'ObjectId') {
+			return res.status(404).json({msg: 'Not found'});
+		}
+		return serverError(err, res);
+	}
+};
+
+// Delete profile, user and posts
+exports.deleteProfileUserAndPosts = async (req, res) => {
+	try {
+		// @TODO: Remove user's posts
+		// Remove the profile
+		await Profile.findOneAndRemove({user: req.user.id});
+		// Remove the user
+		await User.findOneAndRemove({_id: req.user.id});
+		return res.json({msg: 'User deleted'});
 	} catch (err) {
 		return serverError(err, res);
 	}

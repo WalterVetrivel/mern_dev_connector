@@ -7,7 +7,9 @@ const auth = require('../../middleware/auth');
 const {
 	currentProfile,
 	createOrUpdateProfile,
-	getAllProfiles
+	getAllProfiles,
+	getProfileById,
+	deleteProfileUserAndPosts
 } = require('../../controllers/profileController');
 
 const router = express.Router();
@@ -38,5 +40,15 @@ router.post(
 // @desc   Get all profiles
 // @access Public
 router.get('/', getAllProfiles);
+
+// @route  GET api/profile/user/:id
+// @desc   Get profile by user id
+// @access Public
+router.get('/user/:id', getProfileById);
+
+// @route  DELETE api/profile
+// @desc   Delete profile, user and posts
+// @access Private
+router.delete('/', auth, deleteProfileUserAndPosts);
 
 module.exports = router;
