@@ -23,7 +23,8 @@ const {
 	putExperience,
 	deleteExperience,
 	putEducation,
-	deleteEducation
+	deleteEducation,
+	getGithubRepos
 } = require('../../controllers/profileController');
 
 const router = express.Router();
@@ -124,5 +125,10 @@ router.put(
 // @desc   Remove education
 // @access Private
 router.delete('/education/:edu_id', auth, deleteEducation);
+
+// @route  GET api/profile/github/:username
+// @desc   Get user repos from GitHub
+// @access Public
+router.get('/github/:username', getGithubRepos);
 
 module.exports = router;

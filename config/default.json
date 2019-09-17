@@ -1,4 +1,6 @@
 {
 	"mongoURI": "mongodb+srv://dev_connector:eFoInS4OCacKZkhn@devconnector-fuokx.mongodb.net/test?retryWrites=true&w=majority",
-	"jwtSecret": "3ZmayeNMRBpk21VG"
+	"jwtSecret": "3ZmayeNMRBpk21VG",
+	"githubClientId": "9ecf1a7817bfed056c00",
+	"githubClientSecret": "401dc455761d283ddb60a6e7703a6d463eb35b30"
 }
