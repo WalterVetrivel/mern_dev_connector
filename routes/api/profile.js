@@ -1,17 +1,29 @@
 const express = require('express');
 const {check} = require('express-validator');
 
-const validation = require('../../middleware/validation');
+// MIDDLEWARE
+// Auth and validation middleware
 const auth = require('../../middleware/auth');
+const validation = require('../../middleware/validation');
 
-// Import controllers
+// Profile objects middleware
+const {
+	generateProfileObject,
+	generateExperienceObject,
+	generateEducationObject
+} = require('../../middleware/profile/profile');
+
+// CONTROLLERS
 const {
 	currentProfile,
 	createOrUpdateProfile,
 	getAllProfiles,
 	getProfileById,
 	deleteProfileUserAndPosts,
-	putExperience
+	putExperience,
+	deleteExperience,
+	putEducation,
+	deleteEducation
 } = require('../../controllers/profileController');
 
 const router = express.Router();
@@ -24,6 +36,7 @@ router.get('/me', auth, currentProfile);
 // @route  POST api/profile
 // @desc   Create or update profile for current user
 // @access Private
+// @todo Create separate routes for creation and updation
 router.post(
 	'/',
 	[
@@ -34,7 +47,8 @@ router.post(
 		check('skills', 'Skills required')
 			.not()
 			.isEmpty(),
-		validation
+		validation,
+		generateProfileObject
 	],
 	createOrUpdateProfile
 );
@@ -69,10 +83,46 @@ router.put(
 			.isEmpty(),
 		check('from', 'From date is required')
 			.not()
-			.isEmpty()
+			.isEmpty(),
+		validation,
+		generateExperienceObject
 	],
-	validation,
 	putExperience
 );
+
+// @route  DELETE api/profile/experience/:exp_id
+// @desc   Remove experience
+// @access Private
+router.delete('/experience/:exp_id', auth, deleteExperience);
+
+// @route  PUT api/profile/education
+// @desc   Add education
+// @access Private
+router.put(
+	'/education',
+	[
+		auth,
+		check('school', 'School is required')
+			.not()
+			.isEmpty(),
+		check('degree', 'Degree is required')
+			.not()
+			.isEmpty(),
+		check('fieldOfStudy', 'Field of study is required')
+			.not()
+			.isEmpty(),
+		check('from', 'From date is required')
+			.not()
+			.isEmpty(),
+		validation,
+		generateEducationObject
+	],
+	putEducation
+);
+
+// @route  DELETE api/profile/education/:edu_id
+// @desc   Remove education
+// @access Private
+router.delete('/education/:edu_id', auth, deleteEducation);
 
 module.exports = router;

@@ -1,93 +1,7 @@
-// const {validationResult} = require('express-validator');
-
 const serverError = require('../helpers/serverError');
 
 const User = require('../models/User');
 const Profile = require('../models/Profile');
-
-// To generate a profile object using the fields in the request body
-const generateProfileObject = (body, userId) => {
-	const {
-		company,
-		website,
-		location,
-		bio,
-		status,
-		githubUsername,
-		skills,
-		youtube,
-		facebook,
-		twitter,
-		instagram,
-		linkedin
-	} = body;
-
-	// Build profile object
-	const profileFields = {};
-
-	// Required fields
-	if (!userId || !status || !skills) {
-		return res.status(400).json({msg: 'Invalid data'});
-	}
-	profileFields.user = userId;
-	profileFields.status = status;
-	profileFields.skills = skills.split(',').map(skill => skill.trim());
-
-	// Optional fields
-	if (company) profileFields.company = company;
-	if (location) profileFields.location = location;
-	if (website) profileFields.website = website;
-	if (bio) profileFields.bio = bio;
-	if (githubUsername) profileFields.githubUsername = githubUsername;
-
-	// Build social object
-	const social = {};
-	if (youtube) social.youtube = youtube;
-	if (facebook) social.facebook = facebook;
-	if (twitter) social.twitter = twitter;
-	if (instagram) social.instagram = instagram;
-	if (linkedin) social.linkedin = linkedin;
-
-	profileFields.social = social;
-
-	return profileFields;
-};
-
-// To update existing profile
-const updateProfile = async (userId, profileFields) => {
-	return Profile.findOneAndUpdate(
-		{user: userId},
-		{$set: profileFields},
-		{new: true}
-	);
-};
-
-// To create a new profile on the database
-const createProfile = async profileFields => {
-	const profile = new Profile(profileFields);
-	return profile.save();
-};
-
-// To generate a experience object
-const generateExperienceObject = (body, res) => {
-	const {title, company, location, from, to, current, description} = body;
-	const experience = {};
-	// Required fields
-	if (!title || !company || !from) {
-		return res.status(400).json({msg: 'Invalid data'});
-	}
-	experience.title = title;
-	experience.company = company;
-	experience.from = from;
-
-	// Optional fields
-	if (location) experience.location = location;
-	if (current) experience.current = current;
-	else if (to) experience.to = to;
-	if (description) experience.description = description;
-
-	return experience;
-};
 
 // CONTROLLERS
 // Get current user's profile
@@ -106,10 +20,25 @@ exports.currentProfile = async (req, res) => {
 	}
 };
 
+// To update existing profile
+const updateProfile = async (userId, profileFields) => {
+	return Profile.findOneAndUpdate(
+		{user: userId},
+		{$set: profileFields},
+		{new: true}
+	);
+};
+
+// To create a new profile on the database
+const createProfile = async profileFields => {
+	const profile = new Profile(profileFields);
+	return profile.save();
+};
+
 // Create or update profile
 exports.createOrUpdateProfile = async (req, res) => {
 	try {
-		const profileFields = generateProfileObject(req.body, req.user.id);
+		const profileFields = req.profile;
 
 		let profile = await Profile.findOne({user: req.user.id});
 
@@ -173,11 +102,68 @@ exports.deleteProfileUserAndPosts = async (req, res) => {
 // Add experience
 exports.putExperience = async (req, res) => {
 	try {
-		const experience = generateExperienceObject(req.body, res);
+		const experience = req.experience;
 		let profile = await Profile.findOne({user: req.user.id});
 		profile.experience.unshift(experience);
+
 		profile = await profile.save();
 		res.status(200).json(profile);
+	} catch (err) {
+		return serverError(err, res);
+	}
+};
+
+// Delete experience
+exports.deleteExperience = async (req, res) => {
+	try {
+		const profile = await Profile.findOne({user: req.user.id});
+
+		// Get remove index
+		const removeIndex = profile.experience
+			.map(item => item.id)
+			.indexOf(req.params.exp_id);
+
+		// Remove experience at index
+		if (removeIndex < 0) return res.status(404).json({msg: 'Not found'});
+		profile.experience.splice(removeIndex, 1);
+
+		await profile.save();
+		return res.status(200).json({profile});
+	} catch (err) {
+		return serverError(err, res);
+	}
+};
+
+// Add experience
+exports.putEducation = async (req, res) => {
+	try {
+		const education = req.education;
+		let profile = await Profile.findOne({user: req.user.id});
+		profile.education.unshift(education);
+
+		profile = await profile.save();
+		res.status(200).json(profile);
+	} catch (err) {
+		return serverError(err, res);
+	}
+};
+
+// Delete experience
+exports.deleteEducation = async (req, res) => {
+	try {
+		const profile = await Profile.findOne({user: req.user.id});
+
+		// Get remove index
+		const removeIndex = profile.education
+			.map(item => item.id)
+			.indexOf(req.params.exp_id);
+
+		// Remove experience at index
+		if (removeIndex < 0) return res.status(404).json({msg: 'Not found'});
+		profile.education.splice(removeIndex, 1);
+
+		await profile.save();
+		return res.status(200).json({profile});
 	} catch (err) {
 		return serverError(err, res);
 	}
