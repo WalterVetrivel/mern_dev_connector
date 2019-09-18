@@ -123,9 +123,12 @@ exports.deleteExperience = async (req, res) => {
 		const profile = await Profile.findOne({user: req.user.id});
 
 		// Get remove index
-		const removeIndex = profile.experience
+		/* const removeIndex = profile.experience
 			.map(item => item.id)
-			.indexOf(req.params.exp_id);
+			.indexOf(req.params.exp_id); */
+		const removeIndex = profile.experience.findIndex(
+			exp => exp.id === req.params.exp_id
+		);
 
 		// Remove experience at index
 		if (removeIndex < 0) return res.status(404).json({msg: 'Not found'});
@@ -158,9 +161,12 @@ exports.deleteEducation = async (req, res) => {
 		const profile = await Profile.findOne({user: req.user.id});
 
 		// Get remove index
-		const removeIndex = profile.education
+		/* const removeIndex = profile.education
 			.map(item => item.id)
-			.indexOf(req.params.edu_id);
+			.indexOf(req.params.edu_id); */
+		const removeIndex = profile.education.findIndex(
+			edu => edu.id === req.params.edu_id
+		);
 
 		// Remove experience at index
 		if (removeIndex < 0) return res.status(404).json({msg: 'Not found'});

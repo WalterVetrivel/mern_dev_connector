@@ -75,9 +75,7 @@ exports.likePost = async (req, res) => {
 
 		if (!post) return res.status(404).json({msg: 'Not found'});
 
-		if (
-			post.likes.filter(like => like.user.toString() === req.user.id).length > 0
-		)
+		if (post.likes.find(like => like.user.toString() === req.user.id))
 			return res.json({msg: 'Already liked'});
 
 		post.likes.unshift({user: req.user.id});
@@ -98,18 +96,12 @@ exports.unlikePost = async (req, res) => {
 
 		if (!post) return res.status(404).json({msg: 'Not found'});
 
-		if (
-			post.likes.filter(like => like.user.toString() === req.user.id).length ===
-			0
-		)
-			return res.json({msg: 'Not liked yet'});
-
 		// Get remove index
 		const removeIndex = post.likes.findIndex(
 			like => like.user.toString() === req.user.id
 		);
 
-		if (removeIndex < 0) return res.status(404).json({msg: 'Not found'});
+		if (removeIndex < 0) return res.status(404).json({msg: 'Not liked yet'});
 		post.likes.splice(removeIndex, 1);
 
 		await post.save();
