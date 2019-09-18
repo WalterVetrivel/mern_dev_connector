@@ -7,7 +7,8 @@ const validation = require('../../middleware/validation');
 const {
 	createPost,
 	getPosts,
-	getPostById
+	getPostById,
+	deletePost
 } = require('../../controllers/postController');
 
 const router = express.Router();
@@ -33,8 +34,13 @@ router.post(
 router.get('/', auth, getPosts);
 
 // @route  GET api/posts/:id
-// @desc   Get single post
+// @desc   Get single post by id
 // @access Private
 router.get('/:id', auth, getPostById);
+
+// @route  DELETE api/posts/:id
+// @desc   Delete post by ID
+// @access Private
+router.delete('/:id', auth, deletePost);
 
 module.exports = router;
