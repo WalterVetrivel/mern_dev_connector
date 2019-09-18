@@ -112,3 +112,55 @@ exports.unlikePost = async (req, res) => {
 		serverError(err, res);
 	}
 };
+
+// Add comment
+exports.createComment = async (req, res) => {
+	try {
+		const user = await User.findById(req.user.id).select('-password');
+		const post = await Post.findById(req.params.id);
+
+		const comment = {
+			text: req.body.text,
+			name: user.name,
+			avatar: user.avatar,
+			user: req.user.id
+		};
+
+		post.comments.unshift(comment);
+		await post.save();
+
+		return res.json(post.comments);
+	} catch (err) {
+		serverError(err, res);
+	}
+};
+
+// Delete comment
+exports.deleteComment = async (req, res) => {
+	try {
+		const post = await Post.findById(req.params.id);
+		if (!post) return res.status(404).json({msg: 'Post not found'});
+
+		// Retrieve comment
+		const comment = post.comments.find(
+			comm => comm.id === req.params.comment_id
+		);
+		if (!comment) return res.status(404).json({msg: 'Comment not found'});
+
+		if (comment.user.toString() !== req.user.id)
+			return res.status(401).json({msg: 'Unauthorized'});
+
+		const removeIndex = post.comments.findIndex(
+			comm => comm.id === req.params.comment_id
+		);
+
+		if (removeIndex < 0)
+			return res.status(404).json({msg: 'Comment not found'});
+		post.comments.splice(removeIndex, 1);
+		await post.save();
+
+		return res.status(200).json(post.comments);
+	} catch (err) {
+		serverError(err, res);
+	}
+};
