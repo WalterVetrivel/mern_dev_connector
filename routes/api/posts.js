@@ -1,10 +1,40 @@
 const express = require('express');
+const {check} = require('express-validator');
+
+const auth = require('../../middleware/auth');
+const validation = require('../../middleware/validation');
+
+const {
+	createPost,
+	getPosts,
+	getPostById
+} = require('../../controllers/postController');
 
 const router = express.Router();
 
 // @route  POST api/posts
 // @desc   Create post
 // @access Private
-router.get('/', (req, res) => res.send('Posts route'));
+router.post(
+	'/',
+	[
+		auth,
+		check('text', 'Text is required')
+			.not()
+			.isEmpty(),
+		validation
+	],
+	createPost
+);
+
+// @route  GET api/posts
+// @desc   Get posts
+// @access Private
+router.get('/', auth, getPosts);
+
+// @route  GET api/posts/:id
+// @desc   Get single post
+// @access Private
+router.get('/:id', auth, getPostById);
 
 module.exports = router;
