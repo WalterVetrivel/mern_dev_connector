@@ -8,7 +8,9 @@ const {
 	createPost,
 	getPosts,
 	getPostById,
-	deletePost
+	deletePost,
+	likePost,
+	unlikePost
 } = require('../../controllers/postController');
 
 const router = express.Router();
@@ -42,5 +44,15 @@ router.get('/:id', auth, getPostById);
 // @desc   Delete post by ID
 // @access Private
 router.delete('/:id', auth, deletePost);
+
+// @route  PUT api/posts/like/:id
+// @desc   Like post
+// @access Private
+router.put('/like/:id', auth, likePost);
+
+// @route  PUT api/posts/unlike/:id
+// @desc   Unlike post
+// @access Private
+router.put('/unlike/:id', auth, unlikePost);
 
 module.exports = router;
