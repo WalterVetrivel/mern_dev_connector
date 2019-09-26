@@ -1,6 +1,8 @@
 import React, {Fragment, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {isEmpty, isEmail, isLength} from 'validator';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faUser} from '@fortawesome/free-solid-svg-icons';
 
 const Login = () => {
 	const [formData, setFormData] = useState({
@@ -61,7 +63,7 @@ const Login = () => {
 			<div className="alert alert-danger">Invalid credentials</div>
 			<h1 className="large text-primary">Sign In</h1>
 			<p className="lead">
-				<i className="fas fa-user"></i> Sign into Your Account
+				<FontAwesomeIcon icon={faUser} /> Sign into Your Account
 			</p>
 			<form className="form" onSubmit={onSubmit}>
 				<div className="form-group">
